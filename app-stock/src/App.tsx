@@ -1,0 +1,57 @@
+import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
+import Produits from './pages/Produits';
+import Mouvements from './pages/Mouvements';
+import Sommiers from './pages/Sommiers';
+import Fournisseurs from './pages/Fournisseurs';
+import Commandes from './pages/Commandes';
+import Alertes from './pages/Alertes';
+import Inventaire from './pages/Inventaire';
+import LoginPage from './pages/LoginPage';
+import { useAuthStore } from './store/authStore';
+import { useStockStore } from './store/stockStore';
+
+function ProtectedApp() {
+  const { fetchAll, isOffline } = useStockStore();
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#0A0E1A' }}>
+      {isOffline && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999, background: 'rgba(245,200,66,0.15)', borderBottom: '1px solid rgba(245,200,66,0.3)', padding: '6px 24px', fontSize: 12, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          ⚠ Mode démonstration — données locales (API non disponible)
+        </div>
+      )}
+      <Sidebar />
+      <main style={{ flex: 1, overflow: 'auto', paddingTop: isOffline ? 32 : 0 }}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/produits" element={<Produits />} />
+          <Route path="/mouvements" element={<Mouvements />} />
+          <Route path="/sommiers" element={<Sommiers />} />
+          <Route path="/fournisseurs" element={<Fournisseurs />} />
+          <Route path="/commandes" element={<Commandes />} />
+          <Route path="/alertes" element={<Alertes />} />
+          <Route path="/inventaire" element={<Inventaire />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+export default function App() {
+  const { isAuthenticated, checkAuth } = useAuthStore();
+
+  useEffect(() => { checkAuth(); }, [checkAuth]);
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
+        <Route path="/*" element={isAuthenticated ? <ProtectedApp /> : <Navigate to="/login" />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}

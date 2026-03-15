@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#F5C842" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>DJBC Duty Free — Caisse</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => {
+              console.log('[SW] Enregistré:', reg.scope);
+              // Background sync au retour du réseau
+              window.addEventListener('online', () => {
+                if (reg.sync) reg.sync.register('sync-ventes').catch(() => {});
+              });
+            })
+            .catch(err => console.warn('[SW] Erreur:', err));
+
+          // Messages du SW vers l'app
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data?.type === 'NETWORK_BACK') {
+              window.dispatchEvent(new CustomEvent('sw-network-back'));
+            }
+          });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
