@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { Eye, EyeOff, Package, AlertCircle } from 'lucide-react';
 
@@ -8,46 +8,120 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
+  const [tick, setTick] = useState(new Date());
 
-  const handleSubmit = () => { if (username && password) login(username, password); };
+  useEffect(() => {
+    const t = setInterval(() => setTick(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (username && password) login(username, password);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 350, background: 'radial-gradient(ellipse, rgba(245,200,66,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
-      <div style={{ width: '100%', maxWidth: 400 }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ width: 52, height: 52, background: 'var(--accent)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-            <Package size={24} color="var(--bg)" />
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', overflow: 'hidden' }}>
+      {/* Colonne gauche — branding */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '44px 52px', borderRight: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+        {/* Accent vertical très subtil */}
+        <div style={{ position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 1, background: 'linear-gradient(180deg,transparent,var(--accent),transparent)', opacity: 0.3 }} />
+
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, background: 'var(--accent)', borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Package size={18} color="#0C0D11" strokeWidth={2.5} />
           </div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.01em' }}>DUTY FREE</div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: 4 }}>Aéroport de Ouagadougou · DJBC</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text)' }}>DJBC Duty Free</div>
+            <div style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.18em' }}>Stock Management</div>
+          </div>
         </div>
-        <div className="card" style={{ padding: '32px 28px' }}>
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>Stock Manager</div>
-            <div style={{ fontSize: 13, color: 'var(--text-3)' }}>Connectez-vous pour continuer</div>
+
+        {/* Titre principal */}
+        <div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 14 }}>
+            Contrôle & Inventaire
           </div>
-          {error && <div className="alert alert-red" style={{ marginBottom: 18 }}><AlertCircle size={14} style={{ flexShrink: 0 }} />{error}</div>}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div>
-              <label className="field-label">Identifiant</label>
-              <input value={username} onChange={e => setUsername(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSubmit()} placeholder="nom.utilisateur" autoFocus />
-            </div>
-            <div>
-              <label className="field-label">Mot de passe</label>
-              <div style={{ position: 'relative' }}>
-                <input type={showPwd ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSubmit()} placeholder="••••••••" style={{ paddingRight: 40 }} />
-                <button type="button" onClick={() => setShowPwd(s => !s)} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 2 }}>
-                  {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
+          <h1 style={{ fontFamily: 'Playfair Display,Georgia,serif', fontSize: 46, fontWeight: 500, color: 'var(--text)', lineHeight: 1.12, letterSpacing: '-0.02em', marginBottom: 18 }}>
+            Aéroport<br />
+            <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>International</em><br />
+            Ouagadougou
+          </h1>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.65, maxWidth: 360 }}>
+            Gestion rigoureuse des flux de marchandises, suivi des sommiers douaniers et optimisation des approvisionnements pour le Duty Free DJBC.
+          </p>
+        </div>
+
+        {/* Horloge */}
+        <div>
+          <div style={{ fontFamily: 'IBM Plex Mono,monospace', fontSize: 26, fontWeight: 400, color: 'var(--text-2)', letterSpacing: '0.04em', marginBottom: 4 }}>
+            {tick.toLocaleTimeString('fr-FR')}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-3)' }}>
+            {tick.toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
+        </div>
+      </div>
+
+      {/* Colonne droite — formulaire */}
+      <div style={{ width: 440, display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '44px 52px' }}>
+        <div style={{ marginBottom: 36 }}>
+          <div className="section-label" style={{ marginBottom: 7 }}>Connexion</div>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>Stock Manager</h2>
+        </div>
+
+        {error && <div className="alert alert-red" style={{ marginBottom: 18 }}>
+          <AlertCircle size={13} style={{ flexShrink: 0 }} /><span>{error}</span>
+        </div>}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <label className="label-xs" style={{ display: 'block', marginBottom: 6 }}>Identifiant</label>
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Nom d'utilisateur"
+              autoFocus
+              autoComplete="username"
+            />
+          </div>
+          <div>
+            <label className="label-xs" style={{ display: 'block', marginBottom: 6 }}>Mot de passe</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPwd ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                style={{ paddingRight: 38 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(p => !p)}
+                style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 2 }}
+              >
+                {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
             </div>
           </div>
-          <button onClick={handleSubmit} disabled={isLoading || !username || !password} className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: 22, justifyContent: 'center' }}>
-            {isLoading ? 'Connexion...' : 'Se connecter'}
+          <button
+            type="submit"
+            disabled={isLoading || !username || !password}
+            className="btn btn-primary btn-lg"
+            style={{ marginTop: 6, justifyContent: 'center', width: '100%' }}
+          >
+            {isLoading ? 'Connexion…' : 'Se connecter'}
           </button>
+        </form>
+
+        <div style={{ marginTop: 48, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+          <p style={{ fontSize: 11, color: 'var(--text-3)', lineHeight: 1.6 }}>
+            Accès réservé aux gestionnaires de stock DJBC.<br />Le contrôle des inventaires est soumis à la réglementation douanière.
+          </p>
         </div>
-        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 11, color: 'var(--text-3)' }}>DJBC — Direction Générale des Douanes · Burkina Faso</div>
       </div>
     </div>
   );
