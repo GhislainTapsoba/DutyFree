@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Produits from './pages/Produits';
+import Categories from './pages/Categories';
 import Mouvements from './pages/Mouvements';
 import Sommiers from './pages/Sommiers';
 import Fournisseurs from './pages/Fournisseurs';
@@ -29,6 +30,7 @@ function ProtectedApp() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/produits" element={<Produits />} />
+          <Route path="/categories" element={<Categories />} />
           <Route path="/mouvements" element={<Mouvements />} />
           <Route path="/sommiers" element={<Sommiers />} />
           <Route path="/fournisseurs" element={<Fournisseurs />} />

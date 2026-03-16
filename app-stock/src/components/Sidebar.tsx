@@ -3,7 +3,7 @@ import { useAuthStore } from '../store/authStore';
 import { useStockStore } from '../store/stockStore';
 import {
   LayoutDashboard, Package, FileText, Truck,
-  ClipboardList, AlertTriangle, ShoppingCart, ScanSearch, LogOut
+  ClipboardList, AlertTriangle, ShoppingCart, ScanSearch, LogOut, Tag
 } from 'lucide-react';
 
 const nav = [
@@ -11,6 +11,7 @@ const nav = [
   { to: '/', icon: LayoutDashboard, label: 'Tableau de bord' },
   { section: 'Catalogue' },
   { to: '/produits', icon: Package, label: 'Produits' },
+  { to: '/categories', icon: Tag, label: 'Catégories' },
   { to: '/fournisseurs', icon: Truck, label: 'Fournisseurs' },
   { to: '/commandes', icon: ShoppingCart, label: 'Commandes' },
   { section: 'Mouvements' },
@@ -66,7 +67,7 @@ export default function Sidebar() {
       <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', marginTop: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--surface-3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'var(--accent)', flexShrink: 0 }}>
-            {user?.full_name?.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() || 'AD'}
+            {user?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'AD'}
           </div>
           <div style={{ overflow: 'hidden' }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.full_name || 'Admin'}</div>

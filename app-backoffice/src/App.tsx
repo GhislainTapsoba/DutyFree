@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Reporting from './pages/Reporting';
 import Ventes from './pages/Ventes';
 import { ProduitsPage } from './pages/Produits';
+import CategoriesPage from './pages/Categories';
 import { UtilisateursPage } from './pages/Utilisateurs';
 import { PassagersPage } from './pages/Others';
 import { ExportsPage } from './pages/Exports';
@@ -31,6 +32,7 @@ function ProtectedApp() {
           <Route path="/reporting" element={<Reporting />} />
           <Route path="/ventes" element={<Ventes />} />
           <Route path="/produits" element={<ProduitsPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/passagers" element={<PassagersPage />} />
           <Route path="/utilisateurs" element={<UtilisateursPage />} />
           <Route path="/fidelite" element={<FidelitePage />} />
