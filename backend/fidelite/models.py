@@ -38,6 +38,14 @@ class CarteFidelite(models.Model):
         else:
             self.niveau = 'bronze'
 
+    def save(self, *args, **kwargs):
+        if not self.numero:
+            last = CarteFidelite.objects.order_by('-id').first()
+            next_id = (last.id + 1) if last else 1
+            self.numero = f'DF{next_id:08d}'
+        self.update_niveau()
+        super().save(*args, **kwargs)      
+
 
 class MouvementFidelite(models.Model):
     TYPES = [

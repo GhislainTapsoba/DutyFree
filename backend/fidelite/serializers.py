@@ -12,6 +12,7 @@ class MouvementFideliteSerializer(serializers.ModelSerializer):
 class CarteFideliteSerializer(serializers.ModelSerializer):
     mouvements = MouvementFideliteSerializer(many=True, read_only=True)
     nom_complet = serializers.SerializerMethodField()
+    numero = serializers.CharField(read_only=True)  # ← ajouter cette ligne
 
     class Meta:
         model = CarteFidelite

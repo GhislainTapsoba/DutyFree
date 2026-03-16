@@ -19,21 +19,36 @@ class Fournisseur(models.Model):
         return self.nom
 
 
+class Categorie(models.Model):
+    """Catégorie de produits pour le duty free"""
+    nom = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    code = models.CharField(max_length=20, unique=True, blank=True, help_text="Code court pour la catégorie")
+    couleur = models.CharField(max_length=7, default='#6366f1', help_text="Couleur hexadécimale pour l'interface")
+    icone = models.CharField(max_length=50, blank=True, help_text="Nom de l'icône (ex: shopping-bag, bottle)")
+    actif = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Catégorie"
+        verbose_name_plural = "Catégories"
+        ordering = ['nom']
+
+    def __str__(self):
+        return self.nom
+
+    @property
+    def nombre_produits(self):
+        """Retourne le nombre de produits dans cette catégorie"""
+        return self.produits.filter(actif=True).count()
+
+
 class Produit(models.Model):
-    CATEGORIES = [
-        ('alcools', 'Alcools'),
-        ('parfums', 'Parfums'),
-        ('tabac', 'Tabac'),
-        ('cosmetiques', 'Cosmétiques'),
-        ('confiserie', 'Confiserie'),
-        ('accessoires', 'Accessoires'),
-        ('alimentaire', 'Alimentaire'),
-    ]
     code = models.CharField(max_length=20, unique=True)
     code_barres = models.CharField(max_length=50, unique=True, blank=True)
     nom = models.CharField(max_length=200)
     nom_en = models.CharField(max_length=200, blank=True)
-    categorie = models.CharField(max_length=20, choices=CATEGORIES)
+    categorie = models.ForeignKey(Categorie, on_delete=models.SET_NULL, null=True, blank=True, related_name='produits')
     fournisseur = models.ForeignKey(Fournisseur, on_delete=models.SET_NULL, null=True, blank=True, related_name='produits')
     description = models.TextField(blank=True)
     photo = models.ImageField(upload_to='produits/', blank=True, null=True)
@@ -74,7 +89,7 @@ class Produit(models.Model):
         if self.photo:
             from django.conf import settings
             return f"{settings.MEDIA_URL}{self.photo}"
-        return "/static/images/no-image.png"
+        return "/static/images/no-image.svg"
 
 
 class Sommier(models.Model):

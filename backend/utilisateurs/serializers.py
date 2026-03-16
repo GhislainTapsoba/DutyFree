@@ -10,11 +10,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         password = attrs.get('password')
         user = None
 
+        print(f"DEBUG: Tentative auth - username: {username}, password: {'*' * len(password) if password else 'None'}")
+
         # 1. Tentative authentification classique (username/password)
         try:
             from django.contrib.auth import authenticate
             user = authenticate(username=username, password=password)
-        except Exception:
+            print(f"DEBUG: Auth classique résultat: {user}")
+        except Exception as e:
+            print(f"DEBUG: Exception auth classique: {e}")
             pass
 
         # 2. Tentative via PIN ou Password avec register_id si échec username
@@ -23,17 +27,29 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             try:
                 # Chercher par username OU par register_id (en ignorant la casse et les tirets)
                 # Le frontend envoie 'caisse01', on compare avec 'CAISSE-01'
+                normalized_username = username.replace('-', '').replace('_', '').upper()
+                print(f"DEBUG: Normalized username: {normalized_username}")
+                
                 user_obj = Utilisateur.objects.filter(
                     Q(username__iexact=username) | 
                     Q(register_id__iexact=username) |
-                    Q(register_id__iexact=username.replace('caisse', 'CAISSE-'))
+                    Q(register_id__iexact=username.replace('-', '').replace('_', '').upper()) |
+                    Q(register_id__iexact=f"CAISSE-{normalized_username.replace('CAISSE', '')}")
                 ).first()
+                
+                print(f"DEBUG: User trouvé: {user_obj}")
+                print(f"DEBUG: User actif: {user_obj.is_active if user_obj else 'None'}")
+                print(f"DEBUG: PIN de l'user: {user_obj.pin if user_obj else 'None'}")
 
                 if user_obj and user_obj.is_active:
                     # Vérifier soit le password soit le PIN
                     if user_obj.pin == password or user_obj.check_password(password):
                         user = user_obj
-            except Exception:
+                        print(f"DEBUG: Auth réussie via PIN/password")
+                    else:
+                        print(f"DEBUG: PIN/password incorrect")
+            except Exception as e:
+                print(f"DEBUG: Exception recherche user: {e}")
                 pass
 
         if user:

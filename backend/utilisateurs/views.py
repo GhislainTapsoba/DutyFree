@@ -2,6 +2,9 @@ from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.db import models
+from django.db.models.functions import Concat
+from django.db.models import Value, F, CharField
 from .models import Utilisateur
 from .serializers import (UtilisateurSerializer, UtilisateurCreateSerializer, 
                            MeSerializer, CustomTokenObtainPairSerializer)
@@ -16,6 +19,28 @@ class MeView(APIView):
 
     def get(self, request):
         return Response(MeSerializer(request.user).data)
+
+
+class CaissiersPublicView(APIView):
+    """
+    Endpoint public pour récupérer les caissiers actifs (pour la page de login)
+    """
+    permission_classes = []  # Public access
+    
+    def get(self, request):
+        caissiers = Utilisateur.objects.filter(
+            role='caissier', 
+            is_active=True
+        ).annotate(
+            full_name=Concat(
+                Value(''),  # Placeholder pour le prénom
+                F('first_name'),
+                Value(' '),
+                F('last_name'),
+                output_field=CharField()
+            )
+        ).values('id', 'full_name', 'register_id', 'role')
+        return Response(list(caissiers))
 
 
 class UtilisateurViewSet(viewsets.ModelViewSet):

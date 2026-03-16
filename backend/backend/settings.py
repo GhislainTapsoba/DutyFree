@@ -105,3 +105,21 @@ CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:
 CORS_ALLOW_CREDENTIALS = True
 
 EXCHANGE_RATES = {'EUR_XOF': 655.957, 'USD_XOF': 607.50}
+
+# Configuration Email pour l'envoi des commandes fournisseurs
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@dutyfree.com')
+DEFAULT_TO_EMAIL = config('DEFAULT_TO_EMAIL', default='')
+
+# Pour le développement, vous pouvez utiliser ces valeurs de test
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'votre_email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'votre_mot_de_passe_app'
+# EMAIL_USE_TLS = True
+# DEFAULT_FROM_EMAIL = 'votre_email@gmail.com'
