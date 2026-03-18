@@ -22,54 +22,54 @@
 
 /* ── Tokens ────────────────────────────────────────────────────── */
 :root {
-  /* ─ Fonds — nuances de gris bleutés très sombres */
-  --bg:         #0C0D11;
-  --surface:    #13151B;
-  --surface-2:  #191C24;
-  --surface-3:  #1F222C;
-  --surface-4:  #252934;
+  /* ─ Fonds — nuances claires et élégantes (Bleu Professionnel) */
+  --bg:         #F0F4F9;
+  --surface:    #FFFFFF;
+  --surface-2:  #E8EEF4;
+  --surface-3:  #DCE5ED;
+  --surface-4:  #CBD5E1;
 
   /* ─ Bordures */
-  --border:     #22262F;
-  --border-2:   #2D3240;
-  --border-3:   #3A4055;
+  --border:     #DCE5ED;
+  --border-2:   #CBD5E1;
+  --border-3:   #94A3B8;
 
   /* ─ Texte — hiérarchie 4 niveaux */
-  --text:       #EDF0F7;
-  --text-2:     #8892A4;
-  --text-3:     #505A6E;
-  --text-4:     #2E3445;
+  --text:       #0F172A;
+  --text-2:     #334155;
+  --text-3:     #64748B;
+  --text-4:     #94A3B8;
 
-  /* ─ Accent — or patiné, discret */
-  --accent:        #B8914A;
-  --accent-bright: #D4A85C;
-  --accent-dim:    rgba(184,145,74,0.07);
-  --accent-border: rgba(184,145,74,0.16);
+  /* ─ Accent — Orange premium (Hermès / Sunset) */
+  --accent:        #EA580C;
+  --accent-bright: #F97316;
+  --accent-dim:    rgba(234,88,12,0.08);
+  --accent-border: rgba(234,88,12,0.18);
 
-  /* ─ Couleurs sémantiques data (utilisées uniquement pour l'info) */
-  --c-up:       #2EAD78;   /* vert — hausse, OK, entrée */
-  --c-up-dim:   rgba(46,173,120,0.08);
-  --c-up-bd:    rgba(46,173,120,0.18);
+  /* ─ Couleurs sémantiques data */
+  --c-up:       #059669;   /* vert — hausse, OK, entrée */
+  --c-up-dim:   rgba(5,150,105,0.08);
+  --c-up-bd:    rgba(5,150,105,0.18);
 
-  --c-down:     #C9524A;   /* rouge — baisse, alerte, sortie */
-  --c-down-dim: rgba(201,82,74,0.08);
-  --c-down-bd:  rgba(201,82,74,0.18);
+  --c-down:     #DC2626;   /* rouge — baisse, alerte, sortie */
+  --c-down-dim: rgba(220,38,38,0.08);
+  --c-down-bd:  rgba(220,38,38,0.18);
 
-  --c-warn:     #C47B35;   /* ambre — attention, avertissement */
-  --c-warn-dim: rgba(196,123,53,0.08);
-  --c-warn-bd:  rgba(196,123,53,0.18);
+  --c-warn:     #D97706;   /* ambre — attention, avertissement */
+  --c-warn-dim: rgba(217,119,6,0.08);
+  --c-warn-bd:  rgba(217,119,6,0.18);
 
-  --c-info:     #3D75C4;   /* bleu acier — information neutre */
-  --c-info-dim: rgba(61,117,196,0.08);
-  --c-info-bd:  rgba(61,117,196,0.18);
+  --c-info:     #2563EB;   /* bleu acier — information neutre */
+  --c-info-dim: rgba(37,99,235,0.08);
+  --c-info-bd:  rgba(37,99,235,0.18);
 
-  /* ─ Palette graphiques — 6 teintes coordonnées */
-  --g1: #3D75C4;   /* bleu    */
-  --g2: #2EAD78;   /* vert    */
-  --g3: #B8914A;   /* or      */
-  --g4: #C47B35;   /* ambre   */
-  --g5: #7A5FC4;   /* violet  */
-  --g6: #2E9FAD;   /* teal    */
+  /* ─ Palette graphiques — 6 teintes coordonnées claires */
+  --g1: #EA580C;   /* orange  */
+  --g2: #14B8A6;   /* teal    */
+  --g3: #F59E0B;   /* ambre   */
+  --g4: #3B82F6;   /* bleu    */
+  --g5: #8B5CF6;   /* violet  */
+  --g6: #E53E3E;   /* rouge   */
 
   /* ─ Rayons */
   --r-xs: 3px;
@@ -148,12 +148,12 @@ body {
 
 .btn-primary {
   background: var(--accent);
-  color: #0C0D11;
+  color: #FFFFFF;
   border-color: transparent;
 }
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-bright);
-  box-shadow: 0 0 14px rgba(184,145,74,0.22);
+  box-shadow: 0 4px 14px rgba(234,88,12,0.25);
 }
 
 .btn-ghost {
@@ -283,8 +283,8 @@ textarea {
   width: 100%;
 }
 input:focus, select:focus, textarea:focus {
-  border-color: rgba(184,145,74,0.35);
-  box-shadow: 0 0 0 3px rgba(184,145,74,0.06);
+  border-color: rgba(234,88,12,0.35);
+  box-shadow: 0 0 0 3px rgba(234,88,12,0.06);
 }
 input::placeholder { color: var(--text-4); }
 select { cursor: pointer; }
@@ -325,26 +325,26 @@ input[type="number"] { font-family: "IBM Plex Mono", monospace; }
 .sidebar {
   width: 212px;
   min-height: 100vh;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
+  background: var(--accent);
+  border-right: none;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
 }
 .sidebar-logo {
   padding: 18px 16px 14px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255,255,255,0.15);
 }
 .sidebar-logo-mark {
   font-size: 13.5px;
   font-weight: 700;
-  color: var(--text);
+  color: #FFFFFF;
   letter-spacing: -0.01em;
 }
 .sidebar-logo-sub {
   font-size: 9px;
   font-weight: 600;
-  color: var(--text-3);
+  color: rgba(255,255,255,0.7);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   margin-top: 2px;
@@ -352,7 +352,7 @@ input[type="number"] { font-family: "IBM Plex Mono", monospace; }
 .nav-section {
   font-size: 9px;
   font-weight: 600;
-  color: var(--text-4);
+  color: rgba(255,255,255,0.6);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   padding: 14px 18px 4px;
@@ -366,13 +366,13 @@ input[type="number"] { font-family: "IBM Plex Mono", monospace; }
   border-radius: var(--r-sm);
   font-size: 12.5px;
   font-weight: 500;
-  color: var(--text-3);
+  color: rgba(255,255,255,0.85);
   text-decoration: none;
   transition: all 0.12s;
   border: 1px solid transparent;
 }
-.nav-item:hover { background: var(--surface-2); color: var(--text-2); }
-.nav-item.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent-border); }
+.nav-item:hover { background: rgba(255,255,255,0.15); color: #FFFFFF; }
+.nav-item.active { background: #FFFFFF; color: var(--accent); border-color: transparent; font-weight: 600; }
 
 /* ── Topbar ────────────────────────────────────────────────────── */
 .topbar {
@@ -501,29 +501,4 @@ input[type="number"] { font-family: "IBM Plex Mono", monospace; }
 }
 
 
-/* ── Compatibility aliases ─────────────────────────────────────── */
-:root {
-  --accent:        #B8914A;
-  --accent-bright: #D4A85C;
-  --accent-dim:    rgba(184,145,74,0.07);
-  --accent-border: rgba(184,145,74,0.16);
-  --c-up:          #2EAD78;
-  --c-up-dim:      rgba(46,173,120,0.08);
-  --c-up-bd:       rgba(46,173,120,0.18);
-  --c-down:        #C9524A;
-  --c-down-dim:    rgba(201,82,74,0.08);
-  --c-down-bd:     rgba(201,82,74,0.18);
-  --c-warn:        #C47B35;
-  --c-warn-dim:    rgba(196,123,53,0.08);
-  --c-warn-bd:     rgba(196,123,53,0.18);
-  --c-info:        #3D75C4;
-  --c-info-dim:    rgba(61,117,196,0.08);
-  --c-info-bd:     rgba(61,117,196,0.18);
-  --surface-4:     #252934;
-  --border-3:      #3A4055;
-  --text-4:        #2E3445;
-  --sh-sm: 0 1px 3px rgba(0,0,0,0.4);
-  --sh:    0 4px 16px rgba(0,0,0,0.5);
-  --sh-lg: 0 12px 40px rgba(0,0,0,0.65);
-  --r-xs: 3px; --r-sm: 5px; --r: 8px; --r-md: 10px; --r-lg: 14px;
-}
+/* Removed legacy compat aliases */

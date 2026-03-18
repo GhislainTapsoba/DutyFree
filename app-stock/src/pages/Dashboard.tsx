@@ -1,9 +1,9 @@
 import { useStockStore } from '../store/stockStore';
-import { AlertTriangle, TrendingDown, Package, FileText, ArrowUpRight, ArrowDownRight, RefreshCw } from 'lucide-react';
+import { AlertTriangle, TrendingDown, Package, FileText, ArrowUpRight, ArrowDownRight, RefreshCw, TrendingUp } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(n);
-const G = ['#3D75C4','#2EAD78','#B8914A','#C47B35','#7A5FC4','#2E9FAD'];
+const G = ['#EA580C', '#14B8A6', '#F59E0B', '#3B82F6', '#8B5CF6', '#E53E3E'];
 
 function CT({active,payload,label}:any) {
   if(!active||!payload?.length) return null;
@@ -13,13 +13,13 @@ function CT({active,payload,label}:any) {
   </div>;
 }
 
-function KpiCard({icon,label,value,sub,color,alert=false}:{icon:React.ReactNode;label:string;value:number;sub:string;color:string;alert?:boolean}) {
+function KpiCard({icon,label,value,sub,color,alert=false}:{icon:React.ReactNode;label:string;value:number|string;sub:string;color:string;alert?:boolean}) {
   return (
     <div className="card" style={{padding:'16px 18px',position:'relative',overflow:'hidden'}}>
-      {alert&&value>0&&<div style={{position:'absolute',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${color},transparent)`}}/>}
+      {alert&&Number(value)>0&&<div style={{position:'absolute',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${color},transparent)`}}/>}
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
         <div style={{color,background:color+'14',padding:7,borderRadius:6,display:'flex',alignItems:'center',justifyContent:'center'}}>{icon}</div>
-        <span style={{fontFamily:'IBM Plex Mono,monospace',fontSize:26,fontWeight:600,color:alert&&value>0?color:'var(--text)'}}>{value}</span>
+        <span style={{fontFamily:'IBM Plex Mono,monospace',fontSize:26,fontWeight:600,color:alert&&Number(value)>0?color:'var(--text)'}}>{value}</span>
       </div>
       <div style={{fontSize:13,fontWeight:600,color:'var(--text)',marginBottom:2}}>{label}</div>
       <div style={{fontSize:11,color:'var(--text-3)'}}>{sub}</div>
@@ -35,10 +35,12 @@ export default function Dashboard() {
   const sommiersActifs = sommiers.filter(s=>s.statut==='actif').length;
   const sommiersApurement = sommiers.filter(s=>s.statut==='en_cours').length;
   const cmdEnAttente = orders.filter(o=>o.statut==='envoyee').length;
+  
+  const valeurStock = products.reduce((acc, p) => acc + (Math.max(0, p.stock) * p.prix_xof), 0);
 
   const categoryData = ['Alcools','Parfums','Tabac','Cosmétiques','Confiserie','Accessoires'].map(cat=>({
     name:cat.substring(0,6),
-    stock:products.filter(p=>p.categorie===cat.toLowerCase()||(cat==='Cosmétiques'&&p.categorie==='cosmetiques')).reduce((a,p)=>a+p.stock,0),
+    stock:products.filter(p=>p.categorie===cat.toLowerCase()||(cat==='Cosmétiques'&&p.categorie==='cosmetiques')).reduce((a,p)=>a+Math.max(0, p.stock),0),
   }));
 
   const recentMvts = movements.slice(0,6);
@@ -57,11 +59,12 @@ export default function Dashboard() {
       </div>
 
       {/* KPIs */}
-      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:18}}>
-        <KpiCard icon={<Package size={16}/>} label="Total produits"  value={products.length}        sub="articles référencés"              color="#3D75C4"/>
-        <KpiCard icon={<AlertTriangle size={16}/>} label="Ruptures" value={ruptures+critiques}      sub={`${ruptures} rupture · ${critiques} critique`} color="#C9524A" alert/>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,marginBottom:18}}>
+        <KpiCard icon={<Package size={16}/>} label="Produits"  value={products.length}        sub="référencés"              color="#3D75C4"/>
+        <KpiCard icon={<TrendingUp size={16}/>} label="Valeur stock" value={`${fmt(valeurStock)} F`} sub="valorisation globale"     color="#7A5FC4"/>
+        <KpiCard icon={<AlertTriangle size={16}/>} label="Ruptures" value={ruptures+critiques}      sub={`${ruptures} rupture · ${critiques} crit.`} color="#C9524A" alert/>
         <KpiCard icon={<TrendingDown size={16}/>} label="Stock bas"  value={bas}                    sub="sous seuil minimum"                color="#C47B35"/>
-        <KpiCard icon={<FileText size={16}/>} label="Sommiers"       value={sommiersActifs}         sub={`${sommiersApurement} en apurement`} color="#2EAD78"/>
+        <KpiCard icon={<FileText size={16}/>} label="Sommiers"       value={sommiersActifs}         sub={`${sommiersApurement} à apurer`} color="#2EAD78"/>
       </div>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
@@ -75,7 +78,7 @@ export default function Dashboard() {
             <BarChart data={categoryData} barSize={22} margin={{top:2,right:2,bottom:0,left:-18}}>
               <XAxis dataKey="name" tick={{fontSize:10}} axisLine={false} tickLine={false}/>
               <YAxis tick={{fontSize:10}} axisLine={false} tickLine={false}/>
-              <Tooltip content={<CT/>} cursor={{fill:'rgba(184,145,74,0.04)'}}/>
+              <Tooltip content={<CT/>} cursor={{fill:'rgba(234,88,12,0.04)'}}/>
               <Bar dataKey="stock" radius={[3,3,0,0]}>
                 {categoryData.map((_,i)=><Cell key={i} fill={G[i%G.length]}/>)}
               </Bar>

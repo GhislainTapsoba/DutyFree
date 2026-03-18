@@ -20,7 +20,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  const { products } = useStockStore();
+  const { products, fetchProducts } = useStockStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -29,7 +29,7 @@ export default function CategoriesPage() {
   const [formData, setFormData] = useState({ nom: '', description: '', code: '', couleur: '#3D75C4', icone: 'tag' });
 
   useEffect(() => {
-    // Generate categories from products
+    // Generate categories from products using their categorie property
     const categoryMap = new Map<string, { count: number; totalCA: number }>();
 
     products.forEach(product => {
@@ -37,28 +37,28 @@ export default function CategoriesPage() {
       const existing = categoryMap.get(catName) || { count: 0, totalCA: 0 };
       categoryMap.set(catName, {
         count: existing.count + 1,
-        totalCA: existing.totalCA + (product.stock * product.prix_xof)
+        totalCA: existing.totalCA + (Number(product.prix_xof) || 0)
       });
     });
 
-    const mockCategories: Category[] = Array.from(categoryMap.entries()).map(([name, stats], index) => {
+    const apiCategories: Category[] = Array.from(categoryMap.entries()).map(([name, stats], index) => {
       const categoryName = typeof name === 'string' ? name : 'Non catégorisé';
       return {
         id: index + 1,
         nom: categoryName,
-        description: `Gestion des produits ${categoryName.toLowerCase()}`,
-        code: categoryName.substring(0, 3).toUpperCase(),
-        couleur: ['#3D75C4', '#2EAD78', '#B8914A', '#C47B35', '#7A5FC4', '#2E9FAD'][index % 6],
+        code: categoryName.substring(0, 8).toUpperCase(),
+        description: `${stats.count} produit${stats.count > 1 ? 's' : ''} dans cette catégorie`,
+        couleur: ['#EA580C', '#14B8A6', '#F59E0B', '#3B82F6', '#8B5CF6', '#E53E3E'][index % 6],
         icone: 'tag',
-        actif: true,
         nombre_produits: stats.count,
         ca_estime: stats.totalCA,
+        actif: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
     });
 
-    setCategories(mockCategories);
+    setCategories(apiCategories);
     setLoading(false);
   }, [products]);
 
@@ -67,8 +67,8 @@ export default function CategoriesPage() {
     cat.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalProducts = categories.reduce((sum, cat) => sum + cat.nombre_produits, 0);
-  const totalCA = categories.reduce((sum, cat) => sum + (cat.nombre_produits * 50000), 0); // Estimation
+  const totalProducts = categories.reduce((sum, cat) => sum + (Number(cat.nombre_produits) || 0), 0);
+  const totalCA = categories.reduce((sum, cat) => sum + (Number(cat.ca_estime) || 0), 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -448,7 +448,7 @@ export default function CategoriesPage() {
                   Couleur
                 </label>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {['#3D75C4', '#2EAD78', '#B8914A', '#C47B35', '#7A5FC4', '#2E9FAD'].map(color => (
+                  {['#EA580C', '#14B8A6', '#F59E0B', '#3B82F6', '#8B5CF6', '#E53E3E'].map(color => (
                     <button
                       key={color}
                       type="button"

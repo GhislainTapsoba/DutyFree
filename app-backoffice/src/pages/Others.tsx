@@ -1,10 +1,11 @@
-import { users, passengerData } from '../data/mock';
+import { useBackofficeStore } from '../store/backofficeStore';
 import { Download, UserPlus, Shield, Settings2, FileSpreadsheet, FileText, RefreshCw } from 'lucide-react';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n));
 
 export function UtilisateursPage() {
   const roleColors: Record<string, string> = { admin: 'badge-gold', superviseur: 'badge-up', caissier: 'badge-neutral' };
+  const users: Array<{ id: number; name: string; email: string; role: string; lastLogin: string; status: string }> = []; // TODO: Fetch from API when available
 
   return (
     <div className="fade-in" style={{ padding: '36px 40px', maxWidth: 1400, margin: '0 auto' }}>
@@ -51,7 +52,7 @@ export function UtilisateursPage() {
                 <td>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-2)' }}>
-                      {u.name.split(' ').map(n => n[0]).join('').slice(0,2)}
+                      {u.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </div>
                     <span style={{ fontWeight: 500 }}>{u.name}</span>
                   </div>
@@ -59,7 +60,7 @@ export function UtilisateursPage() {
                 <td style={{ fontSize: 12, color: 'var(--text-2)' }}>{u.email}</td>
                 <td><span className={`badge ${roleColors[u.role]}`}>{u.role}</span></td>
                 <td className="mono" style={{ fontSize: 11, color: 'var(--text-2)' }}>
-                  {new Date(u.lastLogin).toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })}
+                  {new Date(u.lastLogin).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                 </td>
                 <td><span className="badge badge-up">{u.status}</span></td>
                 <td>
@@ -132,6 +133,9 @@ export function ExportsPage() {
 }
 
 export function PassagersPage() {
+  const { tauxCapture } = useBackofficeStore();
+  const passengerData = tauxCapture; // Use data from API
+
   return (
     <div className="fade-in" style={{ padding: '36px 40px', maxWidth: 1400, margin: '0 auto' }}>
       <div style={{ marginBottom: 36 }}>
@@ -161,12 +165,13 @@ export function PassagersPage() {
           </thead>
           <tbody>
             {passengerData.map((p, i) => {
-              const prev = i > 0 ? passengerData[i-1].taux : p.taux;
+              const prev = i > 0 ? passengerData[i - 1].taux : p.taux;
               const diff = p.taux - prev;
+              const monthName = new Date(p.annee, p.mois - 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
               return (
-                <tr key={p.month}>
+                <tr key={`${p.annee}-${p.mois}`}>
                   <td style={{ fontWeight: i === passengerData.length - 1 ? 600 : 400 }}>
-                    {p.month} {i === passengerData.length - 1 && <span className="badge badge-gold" style={{ marginLeft: 6 }}>Actuel</span>}
+                    {monthName} {i === passengerData.length - 1 && <span className="badge badge-gold" style={{ marginLeft: 6 }}>Actuel</span>}
                   </td>
                   <td className="mono">{fmt(p.passagers)}</td>
                   <td className="mono">{p.tickets}</td>
@@ -205,25 +210,33 @@ export function ConfigurationPage() {
       </div>
 
       {[
-        { title: 'Taux de change', icon: <Settings2 size={16} />, fields: [
-          { label: 'EUR → XOF', value: '655.957' },
-          { label: 'USD → XOF', value: '607.50' },
-        ]},
-        { title: 'Informations de la boutique', icon: <Settings2 size={16} />, fields: [
-          { label: 'Nom', value: 'DJBC Duty Free Ouagadougou' },
-          { label: 'NIF', value: 'BF-2024-00123456' },
-          { label: 'Adresse', value: 'Aéroport International de Ouagadougou' },
-          { label: 'Téléphone', value: '+226 25 30 65 00' },
-        ]},
-        { title: 'Message ticket de caisse', icon: <Settings2 size={16} />, fields: [
-          { label: 'Message d\'accueil (ligne 1)', value: 'Bienvenue — Welcome' },
-          { label: 'Message d\'accueil (ligne 2)', value: 'Zone de transit international' },
-          { label: 'Message de politesse', value: 'Merci. Bon voyage — Thank you. Safe travels.' },
-        ]},
-        { title: 'Seuils d\'alerte stock', icon: <Settings2 size={16} />, fields: [
-          { label: 'Seuil alerte réapprovisionnement', value: '10 unités' },
-          { label: 'Délai apurement sommier (jours)', value: '30' },
-        ]},
+        {
+          title: 'Taux de change', icon: <Settings2 size={16} />, fields: [
+            { label: 'EUR → XOF', value: '655.957' },
+            { label: 'USD → XOF', value: '607.50' },
+          ]
+        },
+        {
+          title: 'Informations de la boutique', icon: <Settings2 size={16} />, fields: [
+            { label: 'Nom', value: 'DJBC Duty Free Ouagadougou' },
+            { label: 'NIF', value: 'BF-2024-00123456' },
+            { label: 'Adresse', value: 'Aéroport International de Ouagadougou' },
+            { label: 'Téléphone', value: '+226 25 30 65 00' },
+          ]
+        },
+        {
+          title: 'Message ticket de caisse', icon: <Settings2 size={16} />, fields: [
+            { label: 'Message d\'accueil (ligne 1)', value: 'Bienvenue — Welcome' },
+            { label: 'Message d\'accueil (ligne 2)', value: 'Zone de transit international' },
+            { label: 'Message de politesse', value: 'Merci. Bon voyage — Thank you. Safe travels.' },
+          ]
+        },
+        {
+          title: 'Seuils d\'alerte stock', icon: <Settings2 size={16} />, fields: [
+            { label: 'Seuil alerte réapprovisionnement', value: '10 unités' },
+            { label: 'Délai apurement sommier (jours)', value: '30' },
+          ]
+        },
       ].map(section => (
         <div key={section.title} className="card" style={{ padding: '24px', marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>

@@ -16,6 +16,7 @@ def generer_numero():
 
 class CarteFideliteViewSet(viewsets.ModelViewSet):
     queryset = CarteFidelite.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
     search_fields = ['numero', 'nom', 'prenom', 'email', 'telephone']
     ordering_fields = ['points', 'niveau', 'date_inscription', 'nom']
 

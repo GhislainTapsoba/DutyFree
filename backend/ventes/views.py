@@ -77,6 +77,12 @@ class VenteViewSet(viewsets.ModelViewSet):
             .annotate(ca=Sum('lignes__total'), tickets=Count('id', distinct=True))
             .order_by('-ca')
         )
+        
+        # S'assurer que les noms de catégories correspondent à ceux des produits
+        for cat in ca_by_cat:
+            if cat['lignes__produit__categorie'] and isinstance(cat['lignes__produit__categorie'], str):
+                # Normaliser le nom de catégorie pour correspondre au modèle Categorie
+                cat['lignes__produit__categorie'] = cat['lignes__produit__categorie'].strip().title()
 
         # Par caissier
         ca_by_cashier = list(
@@ -84,6 +90,17 @@ class VenteViewSet(viewsets.ModelViewSet):
             .annotate(ca=Sum('total'), tickets=Count('id'))
             .order_by('-ca')
         )
+
+        # CA par moyen de paiement
+        ca_by_payment = list(
+            Vente.objects.filter(date_locale__date__gte=month_start, statut='payee')
+            .values('paiements__methode')
+            .annotate(amount=Sum('paiements__montant_xof'))
+            .order_by('-amount')
+        )
+        
+        # Filtre les paiements non nuls
+        ca_by_payment = [p for p in ca_by_payment if p['paiements__methode'] is not None]
 
         return Response({
             'ca_month': ca_month,
@@ -94,6 +111,7 @@ class VenteViewSet(viewsets.ModelViewSet):
             'ca_daily': ca_daily,
             'ca_by_categorie': ca_by_cat,
             'ca_by_cashier': ca_by_cashier,
+            'ca_by_payment': ca_by_payment,
         })
 
     @action(detail=False, methods=['get'])

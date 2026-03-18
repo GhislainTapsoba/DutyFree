@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Download, Tag } from 'lucide-react';
-import { caByCategory } from '../data/mock';
+import { useBackofficeStore } from '../store/backofficeStore';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n));
 const fmtM = (n: number) => n >= 1_000_000 ? `${(n / 1_000_000).toFixed(2)} M` : fmt(n);
@@ -15,6 +15,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
+  const { dashboardData, fetchDashboard } = useBackofficeStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -23,25 +24,29 @@ export default function CategoriesPage() {
   const [formData, setFormData] = useState({ name: '', description: '', color: '#3D75C4' });
 
   useEffect(() => {
-    // Load categories from mock data
-    const mockCategories: Category[] = caByCategory.map((cat, index) => ({
-      name: cat.category,
-      ca: cat.ca,
-      tickets: cat.tickets,
-      part: cat.part,
-      color: ['#3D75C4', '#2EAD78', '#B8914A', '#C47B35', '#7A5FC4', '#2E9FAD'][index % 6],
-      description: `Gestion des produits ${cat.category.toLowerCase()}`
-    }));
-    setCategories(mockCategories);
+    // Load categories from API data
+    if (dashboardData?.ca_by_categorie) {
+      const apiCategories: Category[] = dashboardData.ca_by_categorie.map((cat, index) => ({
+        name: cat.lignes__produit__categorie || 'Non catégorisé',
+        ca: cat.ca,
+        tickets: cat.tickets,
+        part: cat.tickets, // TODO: Calculate percentage from total
+        color: ['#EA580C', '#14B8A6', '#F59E0B', '#3B82F6', '#8B5CF6', '#E53E3E'][index % 6],
+        description: `Gestion des produits ${String(cat.lignes__produit__categorie || '').toLowerCase()}`
+      }));
+      setCategories(apiCategories);
+    } else {
+      fetchDashboard();
+    }
     setLoading(false);
-  }, []);
+  }, [dashboardData, fetchDashboard]);
 
   const filteredCategories = categories.filter(cat =>
-    cat.name.toLowerCase().includes(search.toLowerCase())
+    String(cat.name).toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalCA = categories.reduce((sum, cat) => sum + cat.ca, 0);
-  const totalTickets = categories.reduce((sum, cat) => sum + cat.tickets, 0);
+  const totalCA = categories.reduce((sum, cat) => sum + (Number(cat.ca) || 0), 0);
+  const totalTickets = categories.reduce((sum, cat) => sum + (Number(cat.tickets) || 0), 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -360,7 +365,7 @@ export default function CategoriesPage() {
                   Couleur
                 </label>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {['#3D75C4', '#2EAD78', '#B8914A', '#C47B35', '#7A5FC4', '#2E9FAD'].map(color => (
+                  {['#EA580C', '#14B8A6', '#F59E0B', '#3B82F6', '#8B5CF6', '#E53E3E'].map(color => (
                     <button
                       key={color}
                       type="button"

@@ -139,7 +139,7 @@ export default function Inventaire() {
           </p>
         </div>
 
-        <div style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 12, padding: 32, marginBottom: 24 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 12, padding: 32, marginBottom: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 28 }}>
             {[
               { label: 'Produits à inventorier', value: products.length },
@@ -177,7 +177,7 @@ export default function Inventaire() {
     const adjustedLines = lines.filter(l => l.valide && Number(l.reel) !== l.theorique);
     return (
       <div style={{ padding: '40px', maxWidth: 900, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', padding: '48px 32px', background: '#111827', border: '1px solid var(--border-2)', borderRadius: 12, marginBottom: 32 }}>
+        <div style={{ textAlign: 'center', padding: '48px 32px', background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 12, marginBottom: 32 }}>
           <Check size={52} color="var(--c-up)" style={{ marginBottom: 16 }} />
           <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', margin: '0 0 8px' }}>Inventaire terminé</h2>
           <div style={{ fontSize: 13, color: 'var(--text-3)' }}>Enregistré le {savedAt}</div>
@@ -190,7 +190,7 @@ export default function Inventaire() {
             { label: 'Avec écart', value: stats.avecEcart, color: 'var(--accent)' },
             { label: 'Ajustements créés', value: adjustedLines.length, color: 'var(--c-info)' },
           ].map(k => (
-            <div key={k.label} style={{ padding: '16px', background: '#111827', border: '1px solid var(--border-2)', borderRadius: 8, textAlign: 'center' }}>
+            <div key={k.label} style={{ padding: '16px', background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 8, textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: k.color, fontFamily: 'IBM Plex Mono, monospace' }}>{k.value}</div>
               <div style={{ fontSize: 10, color: 'var(--text-3)', textTransform: 'uppercase', marginTop: 4 }}>{k.label}</div>
             </div>
@@ -198,7 +198,7 @@ export default function Inventaire() {
         </div>
 
         {adjustedLines.length > 0 && (
-          <div style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--surface-2)', fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Ajustements enregistrés ({adjustedLines.length})
             </div>
@@ -271,7 +271,7 @@ export default function Inventaire() {
       </div>
 
       {/* Barre de progression */}
-      <div style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 10, padding: '16px 20px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 10, padding: '16px 20px', marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <div style={{ fontSize: 12, color: 'var(--text-2)' }}>
             <span style={{ color: 'var(--text)', fontWeight: 700 }}>{stats.saisies}</span>/{stats.total} lignes saisies
@@ -305,7 +305,7 @@ export default function Inventaire() {
         const catEcarts = catLines.filter(l => l.reel !== '' && Number(l.reel) !== l.theorique).length;
         const catValides = catLines.filter(l => l.valide).length;
         return (
-          <div key={cat} style={{ marginBottom: 16, background: '#111827', border: '1px solid var(--border-2)', borderRadius: 10, overflow: 'hidden' }}>
+          <div key={cat} style={{ marginBottom: 16, background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 10, overflow: 'hidden' }}>
             {/* Header catégorie */}
             <div
               onClick={() => toggleCat(cat)}

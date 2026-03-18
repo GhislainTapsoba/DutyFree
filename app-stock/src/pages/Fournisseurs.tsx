@@ -79,7 +79,7 @@ export default function Fournisseurs() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
         {suppliers.map(s => (
-          <div key={s.id} style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 12, padding: 24, transition: 'border-color 0.15s' }}>
+          <div key={s.id} style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 12, padding: 24, transition: 'border-color 0.15s' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
               <div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{s.nom}</div>
@@ -118,7 +118,7 @@ export default function Fournisseurs() {
       {/* MODAL Création / Modification */}
       {modalMode && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={closeModal}>
-          <div style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 14, width: '100%', maxWidth: 540, boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 14, width: '100%', maxWidth: 540, boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Truck size={17} color="var(--accent)" />
@@ -162,7 +162,7 @@ export default function Fournisseurs() {
       {/* Confirmation suppression */}
       {deleteId && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setDeleteId(null)}>
-          <div style={{ background: '#111827', border: '1px solid var(--c-down)', borderRadius: 14, padding: '28px', maxWidth: 400, width: '100%', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--c-down)', borderRadius: 14, padding: '28px', maxWidth: 400, width: '100%', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <AlertTriangle size={20} color="var(--c-down)" />
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Supprimer ce fournisseur ?</div>

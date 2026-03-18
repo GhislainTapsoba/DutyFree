@@ -1,7 +1,6 @@
 import { create } from 'zustand';
-import { stockApi } from '../api';
+import { stockApi, ventesApi, authApi, authStorage } from '../api';
 import type { Produit, Fournisseur, Sommier, Mouvement, Commande } from '../api';
-import { mockProducts, mockSommiers, mockMovements, mockOrders, mockSuppliers } from '../data/mock';
 
 interface StockStore {
   products: Produit[];
@@ -22,22 +21,12 @@ interface StockStore {
   fetchMovements: () => Promise<void>;
   fetchSuppliers: () => Promise<void>;
   addMovement: (data: Partial<Mouvement>) => Promise<void>;
+  updateOrder: (orderId: number, updates: Partial<Commande>) => void;
+  addOrder: (order: Commande) => void;
 }
 
-const adaptMockProducts = (): Produit[] => mockProducts.map(p => ({
-  id: parseInt(p.id.replace('p', '')),
-  code: p.code, code_barres: p.barcode,
-  nom: p.name, nom_en: p.nameEn,
-  categorie: p.category,
-  prix_xof: p.unitPrice, prix_eur: p.priceEur, prix_usd: p.priceUsd,
-  stock: p.stock, stock_min: p.minStock, stock_max: p.maxStock,
-  unite: p.unit,
-  statut_stock: p.status as Produit['statut_stock'],
-  fournisseur: null,
-}));
-
 export const useStockStore = create<StockStore>((set, get) => ({
-  products: adaptMockProducts(),
+  products: [],
   sommiers: [],
   movements: [],
   orders: [],
@@ -56,43 +45,89 @@ export const useStockStore = create<StockStore>((set, get) => ({
     try {
       const res = await stockApi.produits.list();
       set({ products: res.results, loading: false, isOffline: false });
-    } catch { set({ products: adaptMockProducts(), loading: false, isOffline: true }); }
+    } catch {
+      set({ products: [], loading: false, isOffline: true, error: 'Failed to fetch products' });
+    }
   },
 
   fetchSommiers: async () => {
+    set({ loading: true, error: null });
     try {
       const res = await stockApi.sommiers.list();
-      set({ sommiers: res.results });
-    } catch { set({ sommiers: mockSommiers as unknown as Sommier[] }); }
+      set({ sommiers: res.results, loading: false, isOffline: false });
+    } catch {
+      set({ sommiers: [], loading: false, isOffline: true, error: 'Failed to fetch sommiers' });
+    }
   },
 
   fetchMovements: async () => {
+    set({ loading: true, error: null });
     try {
       const res = await stockApi.mouvements.list();
-      set({ movements: res.results });
-    } catch { set({ movements: mockMovements as unknown as Mouvement[] }); }
+      set({ movements: res.results, loading: false, isOffline: false });
+    } catch {
+      set({ movements: [], loading: false, isOffline: true, error: 'Failed to fetch movements' });
+    }
   },
 
   fetchAll: async () => {
     const { fetchProducts, fetchSommiers, fetchMovements } = get();
-    await Promise.allSettled([fetchProducts(), fetchSommiers(), fetchMovements()]);
-    try { const r = await stockApi.fournisseurs.list(); set({ suppliers: r.results }); }
-    catch { set({ suppliers: mockSuppliers as unknown as Fournisseur[] }); }
-    try { const r = await stockApi.commandes.list(); set({ orders: r.results }); }
-    catch { set({ orders: mockOrders as unknown as Commande[] }); }
+    set({ loading: true, error: null });
+
+    try {
+      await Promise.allSettled([fetchProducts(), fetchSommiers(), fetchMovements()]);
+
+      // Fetch suppliers and orders
+      const suppliersRes = await stockApi.fournisseurs.list();
+      const ordersRes = await stockApi.commandes.list();
+
+      set({
+        suppliers: suppliersRes.results,
+        orders: ordersRes.results,
+        loading: false,
+        isOffline: false
+      });
+    } catch (error) {
+      set({
+        loading: false,
+        isOffline: true,
+        error: 'Failed to fetch data'
+      });
+    }
   },
 
   fetchSuppliers: async () => {
-    try { const r = await stockApi.fournisseurs.list(); set({ suppliers: r.results }); }
-    catch { set({ suppliers: mockSuppliers as unknown as Fournisseur[] }); }
+    set({ loading: true, error: null });
+    try {
+      const r = await stockApi.fournisseurs.list();
+      set({ suppliers: r.results, loading: false, isOffline: false });
+    } catch {
+      set({ suppliers: [], loading: false, isOffline: true, error: 'Failed to fetch suppliers' });
+    }
   },
 
   addMovement: async (data) => {
-    const m = await stockApi.mouvements.create(data);
-    set(s => ({ movements: [m, ...s.movements] }));
-    if (data.produit) {
-      const p = await stockApi.produits.get(data.produit as number);
-      set(s => ({ products: s.products.map(pr => pr.id === p.id ? p : pr) }));
+    try {
+      const m = await stockApi.mouvements.create(data);
+      set(s => ({ movements: [m, ...s.movements] }));
+      if (data.produit) {
+        const p = await stockApi.produits.get(data.produit as number);
+        set(s => ({ products: s.products.map(pr => pr.id === p.id ? p : pr) }));
+      }
+    } catch (error) {
+      set({ error: 'Failed to add movement' });
     }
+  },
+
+  updateOrder: (orderId: number, updates: Partial<Commande>) => {
+    set(s => ({
+      orders: s.orders.map(order =>
+        order.id === orderId ? { ...order, ...updates } : order
+      )
+    }));
+  },
+
+  addOrder: (order: Commande) => {
+    set(s => ({ orders: [order, ...s.orders] }));
   },
 }));

@@ -121,6 +121,8 @@ class VenteSerializer(serializers.ModelSerializer):
 class VenteListSerializer(serializers.ModelSerializer):
     caissier_nom = serializers.CharField(source='caissier.full_name', read_only=True)
     nb_articles = serializers.IntegerField(source='lignes.count', read_only=True)
+    lignes = LigneVenteSerializer(many=True, read_only=True)
+    paiements = PaiementSerializer(many=True, read_only=True)
 
     class Meta:
         model = Vente
@@ -128,6 +130,7 @@ class VenteListSerializer(serializers.ModelSerializer):
             'id', 'numero_ticket', 'caissier_nom', 'numero_caisse',
             'total', 'devise', 'statut', 'date_locale', 'passager_nom',
             'vol_reference', 'destination', 'synced', 'nb_articles',
+            'lignes', 'paiements',
         ]
 
 

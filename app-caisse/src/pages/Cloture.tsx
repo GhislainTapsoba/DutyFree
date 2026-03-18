@@ -1,7 +1,92 @@
+import { useState, useRef, useEffect } from 'react';
 import { useCaisseStore } from '../store/caisseStore';
 import { FileText, WifiOff, LogOut, ChevronLeft, TrendingUp, ShoppingBag } from 'lucide-react';
 
 const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n));
+
+function SignaturePad({ id }: { id: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasSig, setHasSig] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.strokeStyle = '#4F46E5'; // Accent color for signature
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      }
+    }
+  }, []);
+
+  const getCoordinates = (canvas: HTMLCanvasElement, e: React.MouseEvent | React.TouchEvent) => {
+    const rect = canvas.getBoundingClientRect();
+    if ('touches' in e) {
+      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+    }
+    return { x: (e as React.MouseEvent).nativeEvent.offsetX, y: (e as React.MouseEvent).nativeEvent.offsetY };
+  };
+
+  const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDrawing(true);
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (ctx && canvas) {
+      const { x, y } = getCoordinates(canvas, e);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+  };
+  
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    e.preventDefault(); // Prevent scrolling on touch
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (ctx && canvas) {
+      const { x, y } = getCoordinates(canvas, e);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      if (!hasSig) setHasSig(true);
+    }
+  };
+
+  const stopDraw = () => setIsDrawing(false);
+  
+  const clear = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0,0, canvas.width, canvas.height);
+      setHasSig(false);
+    }
+  };
+
+  return (
+    <div style={{ position: 'relative', width: '100%', marginBottom: 8 }}>
+      <canvas
+        ref={canvasRef}
+        width={300}
+        height={80}
+        style={{ width: '100%', height: 80, background: 'var(--surface-2)', borderRadius: 6, border: '1px solid var(--border)', cursor: 'crosshair', touchAction: 'none' }}
+        onMouseDown={startDraw}
+        onMouseMove={draw}
+        onMouseUp={stopDraw}
+        onMouseLeave={stopDraw}
+        onTouchStart={startDraw}
+        onTouchMove={draw}
+        onTouchEnd={stopDraw}
+      />
+      {hasSig && (
+        <button onClick={clear} style={{ position: 'absolute', top: 5, right: 5, fontSize: 10, background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text-2)', borderRadius: 4, padding: '2px 6px', cursor: 'pointer', zIndex: 2 }}>Effacer</button>
+      )}
+      {!hasSig && <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', pointerEvents: 'none', color: 'var(--text-3)', fontSize: 11 }}>Signer ici avec la souris ou au doigt</div>}
+    </div>
+  );
+}
 
 export default function Cloture({ onBack }: { onBack: () => void }) {
   const { currentUser, sales, offlineQueue, logout } = useCaisseStore();
@@ -140,15 +225,14 @@ export default function Cloture({ onBack }: { onBack: () => void }) {
           </div>
         )}
 
-        {/* Zones signature */}
+        {/* Zones signature AVEC CANVAS DE DESSIN */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 }}>
           {[{ title: 'Signature Caissier', name: currentUser?.name }, { title: 'Visa Superviseur', name: '' }].map(({ title, name }) => (
             <div key={title} className="card" style={{ padding: '16px' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>{title}</div>
-              <div style={{ height: 52, background: 'var(--surface-2)', borderRadius: 6, border: '1px dashed var(--border-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: 11, color: 'var(--text-3)' }}>Signature</span>
-              </div>
+              <SignaturePad id={title} />
               {name && <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{name}</div>}
+              {!name && <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>_____________</div>}
             </div>
           ))}
         </div>

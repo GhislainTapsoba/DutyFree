@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Star, Search, Plus, Gift, CreditCard, User, ChevronRight, X, Award } from 'lucide-react';
+import { useCaisseStore } from '../store/caisseStore';
+import { authStorage } from '../api';
+import { Star, Search, Plus, X, CreditCard, Award, User, ChevronRight } from 'lucide-react';
 
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -49,18 +51,33 @@ export default function FidelitePage({ onClose, totalVenteXOF, numeroTicket, onC
   const [pointsGagnes, setPointsGagnes] = useState<number | null>(null);
   const [creation, setCreation] = useState({ nom: '', prenom: '', email: '', telephone: '', nationalite: '' });
 
-  const token = localStorage.getItem('token');
+  const token = authStorage.getAccess();
   const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
 
   const chercher = useCallback(async () => {
-    if (!recherche.trim()) return;
+    if (!recherche.trim() || recherche.length < 10) {
+      if (recherche.length > 0 && recherche.length < 10) {
+        setErreur('Numéro de carte incomplet (ex: DF00000001)');
+      }
+      return;
+    }
     setLoading(true); setErreur(''); setCarte(null);
     try {
       const res = await fetch(`${API}/fidelite/par_numero/?numero=${recherche.toUpperCase()}`, { headers });
-      if (res.ok) { setCarte(await res.json()); setMode('details'); }
-      else setErreur('Carte non trouvée. Vérifiez le numéro ou créez une nouvelle carte.');
-    } catch { setErreur('Connexion impossible — mode hors-ligne'); }
-    finally { setLoading(false); }
+      if (res.ok) {
+        setCarte(await res.json());
+        setMode('details');
+      } else if (res.status === 404) {
+        setErreur('Carte non trouvée. Exemples: DF00000001, DF00000002, DF00000003, DF00000004, DF00000005');
+      } else {
+        setErreur('Erreur lors de la recherche. Réessayez plus tard.');
+      }
+    } catch {
+      setErreur('Connexion impossible — mode hors-ligne');
+    }
+    finally {
+      setLoading(false);
+    }
   }, [recherche]);
 
   const creerCarte = async () => {

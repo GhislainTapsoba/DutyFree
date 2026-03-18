@@ -19,7 +19,7 @@ function ProtectedApp() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0A0E1A' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg)' }}>
       {isOffline && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999, background: 'rgba(245,200,66,0.15)', borderBottom: '1px solid rgba(245,200,66,0.3)', padding: '6px 24px', fontSize: 12, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: 6 }}>
           ⚠ Mode démonstration — données locales (API non disponible)

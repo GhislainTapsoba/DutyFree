@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { ventesApi, authApi, authStorage } from '../api';
 import type { DashboardData, VenteListItem, TauxCapture } from '../api';
-import { kpis, dailyCA, caByCategory, caByPayment, caByCashier, recentSales, passengerData } from '../data/mock';
 
 interface BackofficeStore {
   // Auth
@@ -17,6 +16,7 @@ interface BackofficeStore {
   dashboardData: DashboardData | null;
   dashboardLoading: boolean;
   isOffline: boolean;
+  error: string | null;
   fetchDashboard: () => Promise<void>;
 
   // Ventes
@@ -28,27 +28,6 @@ interface BackofficeStore {
   tauxCapture: TauxCapture[];
   fetchTauxCapture: () => Promise<void>;
 }
-
-// Mock fallback pour le dashboard
-const mockDashboard: DashboardData = {
-  ca_month: kpis.caTotal,
-  ca_today: dailyCA[dailyCA.length - 1]?.ca || 0,
-  tickets_month: kpis.totalTickets,
-  tickets_today: dailyCA[dailyCA.length - 1]?.tickets || 0,
-  ticket_moyen: kpis.ticketMoyen,
-  ca_daily: dailyCA.map(d => ({ jour: d.date, ca: d.ca, tickets: d.tickets })),
-  ca_by_categorie: caByCategory.map(c => ({
-    lignes__produit__categorie: c.category,
-    ca: c.ca,
-    tickets: c.tickets,
-  })),
-  ca_by_cashier: caByCashier.map(c => ({
-    caissier__first_name: c.name.split(' ')[0],
-    caissier__last_name: c.name.split(' ')[1] || '',
-    ca: c.ca,
-    tickets: c.tickets,
-  })),
-};
 
 export const useBackofficeStore = create<BackofficeStore>((set, get) => ({
   user: null,
@@ -89,27 +68,27 @@ export const useBackofficeStore = create<BackofficeStore>((set, get) => ({
   dashboardData: null,
   dashboardLoading: false,
   isOffline: false,
+  error: null,
 
   fetchDashboard: async () => {
-    set({ dashboardLoading: true });
+    set({ dashboardLoading: true, error: null });
     try {
       const data = await ventesApi.dashboard();
       set({ dashboardData: data, dashboardLoading: false, isOffline: false });
     } catch {
-      // Fallback données mock
-      set({ dashboardData: mockDashboard, dashboardLoading: false, isOffline: true });
+      set({ dashboardData: null, dashboardLoading: false, isOffline: true, error: 'Failed to fetch dashboard data' });
     }
   },
 
   ventes: [],
   ventesLoading: false,
   fetchVentes: async (params = '') => {
-    set({ ventesLoading: true });
+    set({ ventesLoading: true, error: null });
     try {
       const res = await ventesApi.list(params);
-      set({ ventes: res.results, ventesLoading: false });
+      set({ ventes: res.results, ventesLoading: false, isOffline: false });
     } catch {
-      set({ ventes: recentSales as unknown as VenteListItem[], ventesLoading: false });
+      set({ ventes: [], ventesLoading: false, isOffline: true, error: 'Failed to fetch sales data' });
     }
   },
 
@@ -119,10 +98,7 @@ export const useBackofficeStore = create<BackofficeStore>((set, get) => ({
       const data = await ventesApi.tauxCapture();
       set({ tauxCapture: data });
     } catch {
-      set({ tauxCapture: passengerData.map(p => ({
-        annee: 2025, mois: ['Janv.','Févr.','Mars','Avr.','Mai','Juin'].indexOf(p.month) + 1,
-        passagers: p.passagers, tickets: p.tickets, taux: p.taux,
-      })) });
+      set({ tauxCapture: [], isOffline: true, error: 'Failed to fetch capture rates' });
     }
   },
 }));

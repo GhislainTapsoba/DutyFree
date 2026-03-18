@@ -58,13 +58,21 @@ def alertes(self, request):
         'bas': ProduitListSerializer(bas, many=True).data,
     })
 
+    @action(detail=False, methods=['get'])
     def stats(self, request):
         qs = Produit.objects.filter(actif=True)
+        from django.db.models import F, Sum, DecimalField, ExpressionWrapper
+        
+        # Calculate financial valuation mathematically
+        valeur = qs.annotate(
+            valeur_totale=ExpressionWrapper(F('stock') * F('prix_xof'), output_field=DecimalField())
+        ).aggregate(total=Sum('valeur_totale'))['total'] or 0
+
         return Response({
             'total': qs.count(),
             'ruptures': qs.filter(stock=0).count(),
             'en_alerte': qs.extra(where=['stock <= stock_min']).count(),
-            'valeur_stock': qs.aggregate(v=Sum('stock'))['v'] or 0,
+            'valeur_stock': valeur,
         })
 
     @action(detail=False, methods=['get'])

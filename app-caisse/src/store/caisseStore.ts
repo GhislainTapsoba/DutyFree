@@ -3,22 +3,27 @@ import { persist } from 'zustand/middleware';
 import { stockApi, ventesApi, authApi, authStorage } from '../api';
 import type { Produit, VentePayload } from '../api';
 import type { CartItem, Sale, User, Currency, Payment } from '../types';
-import { mockProducts, mockUsers, exchangeRates } from '../data/mock';
 
 let ticketCounter = parseInt(localStorage.getItem('df_ticket_counter') || '1001');
 
 const saveCounter = () => localStorage.setItem('df_ticket_counter', String(ticketCounter));
 
-const toXOF = (amount: number, currency: Currency, rates: typeof exchangeRates) => {
-  if (currency === 'EUR') return amount * rates.EUR_XOF;
-  if (currency === 'USD') return amount * rates.USD_XOF;
+// Exchange rates from API
+const exchangeRates = {
+  EUR_XOF: 655.957,
+  USD_XOF: 607.50,
+};
+
+const toXOF = (amount: number, currency: Currency) => {
+  if (currency === 'EUR') return amount * exchangeRates.EUR_XOF;
+  if (currency === 'USD') return amount * exchangeRates.USD_XOF;
   return amount;
 };
 
 const priceInCurrency = (p: Produit, currency: Currency) => {
-  if (currency === 'EUR') return p.prix_eur;
-  if (currency === 'USD') return p.prix_usd;
-  return p.prix_xof;
+  if (currency === 'EUR') return Number(p.prix_eur) || 0;
+  if (currency === 'USD') return Number(p.prix_usd) || 0;
+  return Number(p.prix_xof) || 0;
 };
 
 interface CaisseStore {
@@ -53,33 +58,6 @@ interface CaisseStore {
   searchProducts: (q: string) => Produit[];
 }
 
-// Adapter produit API → mock compatible
-const adaptApiProduct = (p: Produit): Produit => ({
-  ...p,
-  prix_xof: typeof p.prix_xof === 'number' ? p.prix_xof : parseFloat(String(p.prix_xof)) || 0,
-  prix_eur: typeof p.prix_eur === 'number' ? p.prix_eur : parseFloat(String(p.prix_eur)) || 0,
-  prix_usd: typeof p.prix_usd === 'number' ? p.prix_usd : parseFloat(String(p.prix_usd)) || 0,
-});
-
-// Adapter mock → API Produit
-const adaptMockToApi = (p: typeof mockProducts[0]): Produit => ({
-  id: parseInt(String(p.id).replace('p', '')) || 1,
-  code: p.code,
-  code_barres: p.barcode || '',
-  nom: p.name || '',
-  nom_en: p.nameEn || '',
-  categorie: p.category || '',
-  prix_xof: p.priceXOF || 0,
-  prix_eur: p.priceEUR || 0,
-  prix_usd: p.priceUSD || 0,
-  stock: p.stock || 0,
-  stock_min: 5,
-  stock_max: 100,
-  unite: 'unité',
-  statut_stock: (p.stock === 0 ? 'rupture' : 'ok') as Produit['statut_stock'],
-  fournisseur: null,
-});
-
 export const useCaisseStore = create<CaisseStore>()(
   persist(
     (set, get) => ({
@@ -90,15 +68,15 @@ export const useCaisseStore = create<CaisseStore>()(
       setActiveCurrency: (c) => set({ activeCurrency: c }),
       rates: exchangeRates,
       cart: [],
-      products: mockProducts.map(adaptMockToApi),
+      products: [],
       productsLoaded: false,
 
       loadProducts: async () => {
         try {
           const res = await stockApi.produits.list();
-          set({ products: res.results.map(adaptApiProduct), productsLoaded: true });
+          set({ products: res.results, productsLoaded: true });
         } catch {
-          set({ products: mockProducts.map(adaptMockToApi) });
+          set({ products: [], productsLoaded: false });
         }
       },
 
@@ -113,29 +91,48 @@ export const useCaisseStore = create<CaisseStore>()(
         set(s => {
           const existing = s.cart.find(i => i.product.id === product.id);
           if (existing) {
-            return { cart: s.cart.map(i => i.product.id === product.id
-              ? { ...i, quantity: i.quantity + 1, total: (i.quantity + 1) * i.unitPrice * (1 - i.discount / 100) }
-              : i) };
+            return {
+              cart: s.cart.map(i => i.product.id === product.id
+                ? { ...i, quantity: i.quantity + 1, total: Number(i.total) + Number(unitPrice) * (1 - Number(i.discount) / 100) }
+                : i)
+            };
           }
-          return { cart: [...s.cart, {
-            product: { ...product, id: product.id } as unknown as CartItem['product'],
-            quantity: 1, unitPrice, currency, discount: 0, total: unitPrice
-          }] };
+          return {
+            cart: [...s.cart, {
+              product: { ...product, id: product.id } as unknown as CartItem['product'],
+              quantity: 1, unitPrice: Number(unitPrice), currency, discount: 0, total: Number(unitPrice)
+            }]
+          };
         });
       },
 
       removeFromCart: (id) => set(s => ({ cart: s.cart.filter(i => i.product.id !== id) })),
       updateQty: (id, qty) => {
         if (qty <= 0) { get().removeFromCart(id); return; }
-        set(s => ({ cart: s.cart.map(i => i.product.id === id
-          ? { ...i, quantity: qty, total: qty * i.unitPrice * (1 - i.discount / 100) }
-          : i) }));
+        set(s => ({
+          cart: s.cart.map(i => {
+            if (i.product.id === id) {
+              const total = qty * Number(i.unitPrice) * (1 - Number(i.discount) / 100);
+              return { ...i, quantity: qty, total: Math.round(total * 100) / 100 };
+            }
+            return i;
+          })
+        }));
       },
       clearCart: () => set({ cart: [], passengerName: '', flightRef: '', destination: '' }),
       cartTotal: () => {
         const { cart, activeCurrency, rates } = get();
+        cart.forEach((item, index) => {
+          console.log(`DEBUG cartTotal - item ${index}:`, {
+            id: item.product.id,
+            name: item.product.nom || item.product.name,
+            unitPrice: item.unitPrice,
+            currency: item.currency,
+            total: item.total
+          });
+        });
         return cart.reduce((sum, item) => {
-          const xof = toXOF(item.total, item.currency as Currency, rates);
+          const xof = toXOF(Number(item.total), item.currency as Currency);
           if (activeCurrency === 'XOF') return sum + xof;
           const rate = activeCurrency === 'EUR' ? rates.EUR_XOF : rates.USD_XOF;
           return sum + xof / rate;
@@ -229,8 +226,7 @@ export const useCaisseStore = create<CaisseStore>()(
         if (offlineQueue.length === 0) return;
         try {
           const result = await ventesApi.syncOffline(offlineQueue);
-          if (result.synced > 0) { set(s => ({ offlineQueue: [] }));
-          }
+          if (result.synced > 0) { set(s => ({ offlineQueue: [] })); }
         } catch { /* retry later */ }
       },
 
@@ -263,7 +259,7 @@ export const useCaisseStore = create<CaisseStore>()(
           p.nom.toLowerCase().includes(lower) ||
           p.code_barres?.includes(q) ||
           p.code.toLowerCase().includes(lower) ||
-          p.categorie.toLowerCase().includes(lower)
+          p.categorie?.toLowerCase().includes(lower)
         );
       },
     }),

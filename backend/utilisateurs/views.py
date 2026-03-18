@@ -39,7 +39,7 @@ class CaissiersPublicView(APIView):
                 F('last_name'),
                 output_field=CharField()
             )
-        ).values('id', 'full_name', 'register_id', 'role')
+        ).values('id', 'username', 'full_name', 'register_id', 'role')
         return Response(list(caissiers))
 
 

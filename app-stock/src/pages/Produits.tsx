@@ -100,7 +100,7 @@ export default function Produits() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: '1 1 260px' }}>
           <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-3)' }} />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nom, code, code-barres..." style={{ width: '100%', background: '#111827', border: '1px solid var(--border-2)', borderRadius: 8, padding: '9px 12px 9px 34px', color: 'var(--text)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nom, code, code-barres..." style={{ width: '100%', background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 8, padding: '9px 12px 9px 34px', color: 'var(--text)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {['Tous', ...CATEGORIES].map(c => (
@@ -118,7 +118,7 @@ export default function Produits() {
         </div>
       </div>
 
-      <div style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 10, overflow: 'hidden' }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 10, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'var(--bg)' }}>
@@ -167,7 +167,7 @@ export default function Produits() {
       {/* MODAL */}
       {modalMode && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }} onClick={closeModal}>
-          <div style={{ background: '#111827', border: '1px solid var(--border-2)', borderRadius: 14, width: '100%', maxWidth: 680, maxHeight: '90vh', overflow: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 14, width: '100%', maxWidth: 680, maxHeight: '90vh', overflow: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ padding: '20px 28px', borderBottom: '1px solid var(--surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Package size={18} color="var(--accent)" />

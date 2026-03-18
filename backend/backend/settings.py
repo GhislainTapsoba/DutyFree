@@ -50,6 +50,16 @@ DATABASES = {
     }
 }
 
+if config('POSTGRES_DB', default=''):
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('POSTGRES_DB'),
+        'USER': config('POSTGRES_USER', default='postgres'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default=''),
+        'HOST': config('POSTGRES_HOST', default='localhost'),
+        'PORT': config('POSTGRES_PORT', default='5432'),
+    }
+
 # Channel Layers - InMemory pour développement (pas Redis requis)
 CHANNEL_LAYERS = {
     'default': {
@@ -101,7 +111,7 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173,http://localhost:5174,http://localhost:5175').split(',')
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:80,http://localhost:81,http://localhost:82,http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176').split(',')
 CORS_ALLOW_CREDENTIALS = True
 
 EXCHANGE_RATES = {'EUR_XOF': 655.957, 'USD_XOF': 607.50}
